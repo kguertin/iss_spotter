@@ -1,21 +1,21 @@
-const request = require('request')
+const request = require('request');
 
 const fetchMyIP = (callback) => {
   request('https://api.ipify.org?format=json', (error, response, body) => {
     if (error) {
       callback(error, null);
       return;
-    } 
+    }
     
     if (response.statusCode !== 200) {
       const msg = `Status code ${response.statusCode} when fetching an IP. Response: ${body}`;
       callback(Error(msg), null);
-      return
+      return;
     }
 
     const ip = JSON.parse(body).ip;
     callback(null, ip);
-  })
+  });
 };
 
 const fetchMyCoordsByIP = (ip, callback) => {
@@ -23,20 +23,38 @@ const fetchMyCoordsByIP = (ip, callback) => {
     if (error) {
       callback(error, null);
       return;
-    } 
+    }
 
     if (response.statusCode !== 200) {
       const msg = `Status Code ${response.statusCode} when fetching coordinates for IP. Response: ${body}`;
       callback(Error(msg), null);
       return;
     }
-    
-    const {latitude, longitude} = JSON.parse(body).data
-    callback(null, {latitude, longitude})
-  })
+
+    const {latitude, longitude} = JSON.parse(body).data;
+    callback(null, {latitude, longitude});
+  });
 };
 
-module.exports = { 
+const fetchISSFlyOverTimes = (coords, callback) => {
+  request(`http://api.open-notify.org/iss-pass.json?lat=${coords.latitude}&lon=${coords.longitude}`, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching coordinates for IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+    const passTimes = JSON.parse(body).response;
+    callback(null, passTimes);
+  });
+};
+
+module.exports = {
   fetchMyIP,
-  fetchMyCoordsByIP
- };
+  fetchMyCoordsByIP,
+  fetchISSFlyOverTimes
+};
