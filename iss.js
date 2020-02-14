@@ -41,7 +41,7 @@ const fetchISSFlyOverTimes = (coords, callback) => {
     if (error) {
       callback(error, null);
       return;
-    }
+    } 
 
     if (response.statusCode !== 200) {
       const msg = `Status Code ${response.statusCode} when fetching coordinates for IP. Response: ${body}`;
@@ -53,8 +53,32 @@ const fetchISSFlyOverTimes = (coords, callback) => {
   });
 };
 
+const nextISSTimeForMyLocation = (callback) => {
+
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null)
+    }
+
+    fetchMyCoordsByIP(ip, (error, coords) => {
+      if (error) {
+        return callback(error, null);
+      }
+
+      fetchISSFlyOverTimes(coords, (error, passTimes) => {
+        if(error) {
+          return callback(error, null);
+        }
+        
+        callback(null, passTimes);
+      })
+    })
+  })
+}
+
 module.exports = {
   fetchMyIP,
   fetchMyCoordsByIP,
-  fetchISSFlyOverTimes
+  fetchISSFlyOverTimes,
+  nextISSTimeForMyLocation
 };
